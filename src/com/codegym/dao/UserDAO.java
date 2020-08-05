@@ -11,6 +11,7 @@ public class UserDAO implements IUserDAO {
     private static final String INSERT_USERS_SQL = "INSERT INTO users" + "  (name, email, country) VALUES " +
             " (?, ?, ?);";
     private static final String SELECT_USER_BY_ID = "select id,name,email,country from users where id =?";
+    private static final String SELECT_USER_BY_NAME = "select id,name,email,country from users where name =?";
     private static final String SELECT_ALL_USERS = "select * from users";
     private static final String DELETE_USERS_SQL = "delete from users where id = ?;";
     private static final String UPDATE_USERS_SQL = "update users set name = ?,email= ?, country =? where id = ?;";
@@ -47,6 +48,7 @@ public class UserDAO implements IUserDAO {
         }
     }
 
+    @Override
     public User selectUser(int id) {
         User user = null;
         // Step 1: Establishing a Connection
@@ -68,6 +70,28 @@ public class UserDAO implements IUserDAO {
             printSQLException(e);
         }
         return user;
+    }
+
+    @Override
+    public List<User> selectUserByName(String name) throws SQLException {
+        List<User> users = new ArrayList<>();
+        Connection conn = getConnection();
+        PreparedStatement preparedStatement = conn.prepareStatement(SELECT_USER_BY_NAME);
+        preparedStatement.setString(1, name);
+
+        System.out.println(preparedStatement);
+
+        ResultSet rs = preparedStatement.executeQuery();
+
+        while (rs.next()) {
+            String name_rs = rs.getString("name");
+            String email = rs.getString("email");
+            String country = rs.getString("country");
+
+            User user = new User(name_rs, email, country);
+            users.add(user);
+        }
+        return users;
     }
 
     public List<User> selectAllUsers() {
